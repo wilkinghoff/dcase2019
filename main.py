@@ -351,6 +351,7 @@ else:
 ########################################################################################################################
 # train and evaluate DCAEs
 ########################################################################################################################
+"""
 batch_size = 32
 batch_size_test = 32
 epochs = 100
@@ -453,7 +454,7 @@ np.save('outlier_scores.npy', outlier_scores)
 np.save('outlier_scores_eval_clf.npy', outlier_scores_eval_clf)
 np.save('outlier_scores_unknown_clf.npy', outlier_scores_unknown_clf)
 np.save('outlier_scores_clf.npy', outlier_scores_clf)
-
+"""
 ########################################################################################################################
 # Preprocessing for CNNs
 ########################################################################################################################
@@ -463,7 +464,7 @@ train_harmonic_feats = np.concatenate([train_harmonic_feats, eval_harmonic_feats
 train_percussive_feats = np.concatenate([train_percussive_feats, eval_percussive_feats], axis=0)
 
 # feature normalization
-print('Normalizing data')
+print('Normalizing data globally')
 eps = 1e-12
 mean_mel_spec = np.mean(train_mel_spec_feats, axis=0)
 std_mel_spec = np.std(train_mel_spec_feats, axis=0)
@@ -565,27 +566,33 @@ for k in np.arange(aeons):
 print('Predicting on leaderboard data')
 if feature_type == 'mel_spec':
     pred_leaderboard_base = model_base.predict(leaderboard_mel_spec_feats)
+    pred_unknown_base = model_base.predict(unknown_mel_spec_feats)
 elif feature_type == 'harmonic':
     pred_leaderboard_base = model_base.predict(leaderboard_harmonic_feats)
+    pred_unknown_base = model_base.predict(unknown_mel_spec_feats)
 elif feature_type == 'percussive':
     pred_leaderboard_base = model_base.predict(leaderboard_percussive_feats)
+    pred_unknown_base = model_base.predict(unknown_mel_spec_feats)
 else:
     raise ValueError('Invalid feature type!')
 
 np.save('pred_leaderboard_base.npy', pred_leaderboard_base)
+np.save('pred_unknown_base.npy', pred_unknown_base)
 
 ########################################################################################################################
 # predict on leaderboard data
 ########################################################################################################################
 
 # do closed-set classification
-combined_scores = pred_leaderboard_base*outlier_scores_clf
-pred_cat_leaderboard = np.argmax(combined_scores, axis=1)
+pred_cat_leaderboard = np.argmax(pred_leaderboard_base, axis=1)
 leaderboard_results = pd.DataFrame({'Id': np.arange(pred_cat_leaderboard.shape[0]),
                                     'Scene_label': categories[pred_cat_leaderboard]})
 
 # estimate outliers
-threshold = 0.25
+outlier_scores_clf = np.load('outlier_scores_clf.npy')
+outlier_scores_unknown_clf = np.load('outlier_scores_unknown_clf.npy')
+combined_scores = np.max(pred_leaderboard_base, axis=1)*outlier_scores_clf
+threshold = np.mean(outlier_scores_unknown_clf*np.max(pred_unknown_base,axis=1))
 leaderboard_results['Scene_label'][combined_scores < threshold] = 'unknown'
 
 # store results
