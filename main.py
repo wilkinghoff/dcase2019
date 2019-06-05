@@ -90,35 +90,6 @@ class LogMelExtractor(object):
         return logmel_spectrogram, log_D_harmonic, log_D_percussive
 
 
-class FusionLayer(Layer):
-    """
-    Custom Layer for fusing scores via Logistic Regression in a neural network.
-    """
-    def __init__(self, num_classes, num_models, **kwargs):
-        self.num_classes = num_classes
-        self.num_models = num_models
-        super(FusionLayer, self).__init__(**kwargs)
-
-    def build(self, input_shape):
-        self.fusion_weights = self.add_weight(name='fusion_weights', shape=(self.num_models+1,), initializer='uniform',
-                                              trainable=True, regularizer=keras.regularizers.l2(0.0005))
-        super(FusionLayer, self).build(input_shape)
-
-    def call(self, x):
-        output = x[:, 0:self.num_classes]*self.fusion_weights[1]+self.fusion_weights[0]
-        for k in np.arange(1, self.num_models):
-            output = output + x[:, k*self.num_classes:self.num_classes*(k+1)]*self.fusion_weights[k+1]
-        return K.softmax(output)
-
-    def get_config(self):
-        config = {'num_classes': self.num_classes, 'num_models': self.num_models}
-        base_config = super(FusionLayer, self).get_config()
-        return dict(list(base_config.items()) + list(config.items()))
-
-    def compute_output_shape(self, input_shape):
-        return (input_shape[0], self.num_classes)
-
-
 def model_cnn(feat_length, nceps):
     """
     Definition of the 2D CNN used for mel spectrograms.
@@ -162,23 +133,6 @@ def model_cnn(feat_length, nceps):
     x = keras.layers.Activation(activation='relu')(x)
     x = keras.layers.GlobalAveragePooling2D()(x)
     model_output = keras.layers.Dense(10, activation='softmax')(x)
-    """
-    x = keras.layers.Conv2D(32, kernel_size=7, padding='same')(input)
-    x = keras.layers.BatchNormalization()(x)
-    x = keras.layers.Activation(activation='relu')(x)
-    x = keras.layers.MaxPooling2D(pool_size=5)(x)
-    x = keras.layers.Dropout(0.3)(x)
-    x = keras.layers.Conv2D(64, kernel_size=7, padding='same')(x)
-    x = keras.layers.BatchNormalization()(x)
-    x = keras.layers.Activation(activation='relu')(x)
-    x = keras.layers.MaxPooling2D(pool_size=(4, 100))(x)
-    x = keras.layers.Dropout(0.3)(x)
-    x = keras.layers.Flatten()(x)
-    x = keras.layers.Dense(100)(x)
-    x = keras.layers.Activation(activation='relu')(x)
-    x = keras.layers.Dropout(0.3)(x)
-    model_output = keras.layers.Dense(10, activation='softmax', kernel_initializer='uniform')(x)
-    """
     return input, model_output
 
 
@@ -245,7 +199,6 @@ dataset_path = 'D:/dcase2019_task1_baseline-master/datasets/TAU-urban-acoustic-s
 train_sheet = pd.DataFrame({'File': [l.split("\t")[0].split("\n")[0] for l in open(dataset_path + 'evaluation_setup/fold1_train.csv','r').readlines()[1:]],
                           'Category': [l.split("\t")[1].split("\n")[0] for l in open(dataset_path + 'evaluation_setup/fold1_train.csv','r').readlines()[1:]]})
 categories = np.unique(train_sheet.Category)
-#print(categories)
 extractor = LogMelExtractor(32000, 1024, 500, 64, 50, 16000)
 if os.path.isfile('train_labels.npy') and os.path.isfile('train_mel_spec_feats' + str(nceps_mel_spec) + '.npy')\
         and os.path.isfile('train_harmonic_feats' + str(nceps_mel_spec) + '.npy')\
@@ -404,9 +357,9 @@ epochs = 100
 aeons = 10
 y_train_cat = keras.utils.np_utils.to_categorical(train_labels, num_classes=len(categories)-1)
 y_eval_cat = keras.utils.np_utils.to_categorical(eval_labels, num_classes=len(categories)-1)
-# feature_type = 'mel_spec'
+feature_type = 'mel_spec'
 # feature_type = 'harmonic'
-feature_type = 'percussive'
+# feature_type = 'percussive'
 if feature_type == 'mel_spec':
     train_data = train_mel_spec_feats
     eval_data = eval_mel_spec_feats
@@ -457,20 +410,12 @@ for j in np.arange(len(categories)):
         input, model_output = model_dcae_def(feat_length=442, nceps=nceps_mel_spec)
         model_dcae = keras.Model(inputs=[input], outputs=[model_output])
         model_dcae.compile(loss=keras.losses.mean_squared_error, optimizer=keras.optimizers.adam(decay=0.0001))
-        print(model_dcae.summary())
-
-        # checkpoint = keras.callbacks.ModelCheckpoint('wts_mel_spec.h5', monitor='val_loss', save_best_only=True,)
-        tensorboard_callback = keras.callbacks.TensorBoard(log_dir='./logs_dcae', histogram_freq=0,
-                                                           write_graph=True,
-                                                           write_images=False)
 
         for k in np.arange(aeons):
             # fit model
             weight_path = 'wts_dcae_' + feature_type + '_' + category + '_' + str(k+1) + 'k.h5'
             if not os.path.isfile(weight_path):
-                model_dcae.fit(train_data_dcae, train_data_dcae, verbose=2, batch_size=batch_size, epochs=epochs,
-                                #validation_data=(eval_data_dcae, eval_data_dcae)
-                                )
+                model_dcae.fit(train_data_dcae, train_data_dcae, verbose=2, batch_size=batch_size, epochs=epochs)
                 model_dcae.save(weight_path)
             else:
                 model_dcae = keras.models.load_model(weight_path)
@@ -569,7 +514,6 @@ input, model_output = model_cnn(442, nceps=nceps_mel_spec)
 model_base = keras.Model(inputs=[input], outputs=[model_output])
 model_base.compile(loss=keras.losses.categorical_crossentropy, optimizer=keras.optimizers.adam(decay=0.0001),
                        metrics=['accuracy'])
-print(model_base.summary())
 
 feature_type = 'mel_spec'
 # feature_type = 'harmonic'
@@ -618,10 +562,6 @@ for k in np.arange(aeons):
     acc = np.mean(np.argmax(pred_base, axis=1) == np.argmax(y_eval_cat, axis=1))
     print('Accuracy of base model is ' + str(acc))
 
-########################################################################################################################
-# predict on leaderboard data
-########################################################################################################################
-
 print('Predicting on leaderboard data')
 if feature_type == 'mel_spec':
     pred_leaderboard_base = model_base.predict(leaderboard_mel_spec_feats)
@@ -631,6 +571,12 @@ elif feature_type == 'percussive':
     pred_leaderboard_base = model_base.predict(leaderboard_percussive_feats)
 else:
     raise ValueError('Invalid feature type!')
+
+np.save('pred_leaderboard_base.npy', pred_leaderboard_base)
+
+########################################################################################################################
+# predict on leaderboard data
+########################################################################################################################
 
 # do closed-set classification
 combined_scores = pred_leaderboard_base*outlier_scores_clf
