@@ -15,6 +15,9 @@ from scipy.stats.mstats import gmean
 
 
 class LogMelExtractor(object):
+    """
+    Original source code (before changes): https://github.com/qiuqiangkong/dcase2019_task1
+    """
     def __init__(self, sample_rate, window_size, hop_size, mel_bins, fmin, fmax):
         """Log mel feature extractor.
 
