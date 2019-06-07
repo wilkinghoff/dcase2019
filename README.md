@@ -6,6 +6,6 @@ The system consists of a combination of convolutional neural networks for closed
 
 No external data nor pretrained models have been used for our system. All neural networks are implemented with Keras and Tensorflow.
 
-# When finding this code helpful, or reusing parts of it, please cite:
+When finding this code helpful, or reusing parts of it, please cite:
 
 
