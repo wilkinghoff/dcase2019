@@ -1,7 +1,6 @@
 import pandas as pd
 import numpy as np
 import librosa
-from sklearn.model_selection import StratifiedKFold
 import keras
 from mixup_generator import MixupGenerator
 from random_eraser import get_random_eraser
