@@ -1,16 +1,11 @@
 import pandas as pd
 import numpy as np
 import librosa
-from sklearn.model_selection import StratifiedKFold
 import keras
 from mixup_generator import MixupGenerator
 from random_eraser import get_random_eraser
-import matplotlib.pyplot as plt
 import os
-from keras.engine.topology import Layer
 from keras import backend as K
-import tensorflow as tf
-from scipy.signal import medfilt2d
 from scipy.stats.mstats import gmean
 
 
