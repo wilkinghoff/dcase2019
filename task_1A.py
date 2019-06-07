@@ -330,10 +330,10 @@ for k in np.arange(test_percussive_feats.shape[0]):
 ########################################################################################################################
 # train base cnn on all data
 ########################################################################################################################
-batch_size = 16
-batch_size_test = 16
+batch_size = 32
+batch_size_test = 32
 epochs = 1000
-aeons = 10
+aeons = 6
 alpha = 1
 y_train_cat = keras.utils.np_utils.to_categorical(train_labels, num_classes=len(categories))
 y_eval_cat = keras.utils.np_utils.to_categorical(eval_labels, num_classes=len(categories))
