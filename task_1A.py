@@ -423,10 +423,11 @@ leaderboard_results_ensemble.to_csv('output_leaderboard_ensemble.csv', encoding=
 # test data
 np.save('pred_test_base.npy', pred_test_base)
 pred_cat_test = np.argmax(pred_test_base[0], axis=1)
-test_results_single = pd.DataFrame({'File': [m+str(n) for m, n in zip([l.split("\n")[0] for l in open(dataset_test_path + 'evaluation_setup/test.csv','r').readlines()[1:]],categories[pred_cat_test])]})
+test_results_single = pd.DataFrame({'File': [file_name + "\t" + scene_label for file_name, scene_label in
+                                             zip([l.split("\n")[0] for l in open(dataset_test_path + 'evaluation_setup/test.csv','r').readlines()[1:]], categories[pred_cat_test])]})
 test_results_single.to_csv('output_test_single.csv', encoding='utf-8', index=False, header=False)
 
 pred_cat_test = np.argmax(gmean(np.concatenate([pred_test_base, np.expand_dims(pred_test_base[0], axis=0)], axis=0), axis=0), axis=1)
-test_results_ensemble = pd.DataFrame({'File': [m+str(n) for m, n in zip([l.split("\n")[0] for l in open(dataset_test_path + 'evaluation_setup/test.csv','r').readlines()[1:]],categories[pred_cat_test])]})
-
+test_results_ensemble = pd.DataFrame({'File': [file_name + "\t" + scene_label for file_name, scene_label in
+                                               zip([l.split("\n")[0] for l in open(dataset_test_path + 'evaluation_setup/test.csv','r').readlines()[1:]], categories[pred_cat_test])]})
 test_results_ensemble.to_csv('output_test_ensemble.csv', encoding='utf-8', index=False, header=False)
