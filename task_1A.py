@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import librosa
+from sklearn.model_selection import StratifiedKFold
 import keras
 from mixup_generator import MixupGenerator
 from random_eraser import get_random_eraser
@@ -339,7 +340,6 @@ aeons = 6
 alpha = 1
 y_train_cat = keras.utils.np_utils.to_categorical(train_labels, num_classes=len(categories))
 y_eval_cat = keras.utils.np_utils.to_categorical(eval_labels, num_classes=len(categories))
-# print(model_base.summary())
 
 feature_types = ['mel_spec', 'harmonic', 'percussive']
 pred_leaderboard_base = np.ones((3, leaderboard_mel_spec_feats.shape[0], len(categories)))
@@ -428,9 +428,10 @@ leaderboard_results_ensemble.to_csv('output_leaderboard_ensemble.csv', encoding=
 # test data
 np.save('pred_test_base.npy', pred_test_base)
 pred_cat_test = np.argmax(pred_test_base[0], axis=1)
-test_results_single = pd.DataFrame({'Id': np.arange(pred_cat_test.shape[0]), 'Scene_label': categories[pred_cat_test]})
-test_results_single.to_csv('output_test_single.csv', encoding='utf-8', index=False)
+test_results_single = pd.DataFrame({'File': [m+str(n) for m, n in zip([l.split("\n")[0] for l in open(dataset_test_path + 'evaluation_setup/test.csv','r').readlines()[1:]],categories[pred_cat_test])]})
+test_results_single.to_csv('output_test_single.csv', encoding='utf-8', index=False, header=False)
 
 pred_cat_test = np.argmax(gmean(np.concatenate([pred_test_base, np.expand_dims(pred_test_base[0], axis=0)], axis=0), axis=0), axis=1)
-test_results_ensemble = pd.DataFrame({'Id': np.arange(pred_cat_test.shape[0]), 'Scene_label': categories[pred_cat_test]})
-test_results_ensemble.to_csv('output_test_ensemble.csv', encoding='utf-8', index=False)
+test_results_ensemble = pd.DataFrame({'File': [m+str(n) for m, n in zip([l.split("\n")[0] for l in open(dataset_test_path + 'evaluation_setup/test.csv','r').readlines()[1:]],categories[pred_cat_test])]})
+
+test_results_ensemble.to_csv('output_test_ensemble.csv', encoding='utf-8', index=False, header=False)
