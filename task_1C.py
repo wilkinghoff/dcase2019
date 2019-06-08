@@ -498,9 +498,11 @@ for k_feat, feature_type in enumerate(feature_types):
 np.save('outlier_scores_eval.npy', outlier_scores_eval)
 np.save('outlier_scores_unknown.npy', outlier_scores_unknown)
 np.save('outlier_scores.npy', outlier_scores)
+np.save('outlier_scores.npy', outlier_scores_test)
 np.save('outlier_scores_eval_clf.npy', outlier_scores_eval_clf)
 np.save('outlier_scores_unknown_clf.npy', outlier_scores_unknown_clf)
 np.save('outlier_scores_clf.npy', outlier_scores_clf)
+np.save('outlier_scores_clf.npy', outlier_scores_test_clf)
 
 ########################################################################################################################
 # Preprocessing for CNNs
@@ -639,9 +641,9 @@ pred_cat_leaderboard_ensemble = np.argmax(gmean(np.concatenate([pred_leaderboard
 # estimate outliers
 threshold_outlier = 0.5
 threshold_closed = 0.5
-pred_cat_leaderboard_single[outlier_scores_clf < threshold_outlier] = 10
+pred_cat_leaderboard_single[outlier_scores_clf[0] < threshold_outlier] = 10
 pred_cat_leaderboard_single[np.max(pred_leaderboard_base[0], axis=1) < threshold_closed] = 10
-pred_cat_leaderboard_ensemble[outlier_scores_clf < threshold_outlier] = 10
+pred_cat_leaderboard_ensemble[gmean(np.concatenate([outlier_scores_clf, np.expand_dims(outlier_scores_clf[0], axis=0)], axis=0), axis=0) < threshold_outlier] = 10
 pred_cat_leaderboard_ensemble[np.max(gmean(np.concatenate([pred_leaderboard_base, np.expand_dims(pred_leaderboard_base[0], axis=0)], axis=0), axis=0), axis=1) < threshold_closed] = 10
 
 # store results
