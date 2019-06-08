@@ -6,7 +6,7 @@ The system consists of a combination of convolutional neural networks for closed
 
 No external data nor pretrained models have been used for our system. All neural networks are implemented with Keras and Tensorflow.
 
-When finding this code helpful, or reusing parts of it, please cite:
+When finding this code helpful, or reusing parts of it, a citation would be appreciated:
 
 @techreport{wilkinghoff2019dcase,
   title={Open-set acoustic scene classification with deep convolutional autoencoders},
