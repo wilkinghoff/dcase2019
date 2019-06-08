@@ -649,7 +649,7 @@ pred_cat_leaderboard_ensemble[np.max(gmean(np.concatenate([pred_leaderboard_base
 # store results
 leaderboard_results_single = pd.DataFrame({'Id': np.arange(pred_cat_leaderboard_single.shape[0]),
                                     'Scene_label': categories[pred_cat_leaderboard_single]})
-leaderboard_results_single.to_csv('output_leaderboard.csv', encoding='utf-8', index=False)
+leaderboard_results_single.to_csv('output_leaderboard_single.csv', encoding='utf-8', index=False)
 leaderboard_results_ensemble = pd.DataFrame({'Id': np.arange(pred_cat_leaderboard_ensemble.shape[0]),
                                     'Scene_label': categories[pred_cat_leaderboard_ensemble]})
 leaderboard_results_ensemble.to_csv('output_leaderboard_ensemble.csv', encoding='utf-8', index=False)
