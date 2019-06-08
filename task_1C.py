@@ -389,11 +389,11 @@ y_train_cat = keras.utils.np_utils.to_categorical(train_labels, num_classes=len(
 y_eval_cat = keras.utils.np_utils.to_categorical(eval_labels, num_classes=len(categories)-1)
 
 feature_types = ['mel_spec', 'harmonic', 'percussive']
+outlier_scores_clf = np.zeros((len(feature_types), leaderboard_mel_spec_feats.shape[0]))
+outlier_scores_eval_clf = np.zeros((len(feature_types), eval_mel_spec_feats.shape[0]))
+outlier_scores_unknown_clf = np.zeros((len(feature_types), unknown_mel_spec_feats.shape[0]))
+outlier_scores_test_clf = np.zeros((len(feature_types), test_mel_spec_feats.shape[0]))
 for k_feat, feature_type in enumerate(feature_types):
-    outlier_scores_clf = np.zeros((3, leaderboard_mel_spec_feats.shape[0]))
-    outlier_scores_eval_clf = np.zeros((3, eval_mel_spec_feats.shape[0]))
-    outlier_scores_unknown_clf = np.zeros((3, unknown_mel_spec_feats.shape[0]))
-    outlier_scores_test_clf = np.zeros((3, test_mel_spec_feats.shape[0]))
     if feature_type == 'mel_spec':
         train_data = train_mel_spec_feats
         eval_data = eval_mel_spec_feats
@@ -564,8 +564,8 @@ y_train_cat = keras.utils.np_utils.to_categorical(train_labels, num_classes=len(
 y_eval_cat = keras.utils.np_utils.to_categorical(eval_labels, num_classes=len(categories)-1)
 
 feature_types = ['mel_spec', 'harmonic', 'percussive']
-pred_leaderboard_base = np.ones((3, leaderboard_mel_spec_feats.shape[0], len(categories)))
-pred_test_base = np.ones((3, test_mel_spec_feats.shape[0], len(categories)))
+pred_leaderboard_base = np.ones((len(feature_types), leaderboard_mel_spec_feats.shape[0], len(categories)))
+pred_test_base = np.ones((len(feature_types), test_mel_spec_feats.shape[0], len(categories)))
 for k_feat, feature_type in enumerate(feature_types):
     K.clear_session()
     if feature_type == 'mel_spec':
