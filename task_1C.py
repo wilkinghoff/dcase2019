@@ -145,7 +145,7 @@ def model_dcae_def(feat_length, nceps):
     """
     input = keras.layers.Input(shape=(nceps, feat_length, 1), dtype='float32')
 
-    # encoder (same as discriminative) CNN model
+    # encoder
     x = keras.layers.Conv2D(64, kernel_size=3, padding='same')(input)
     x = keras.layers.BatchNormalization()(x)
     x = keras.layers.Activation(activation='relu')(x)
