@@ -8,11 +8,11 @@ No external data nor pretrained models have been used for our system. All neural
 
 When finding this code helpful, or reusing parts of it, a citation would be appreciated:
 
-@unpublished{wilkinghoff2019open,
+@inproceedings{wilkinghoff2019open,
   title={Open-Set Acoustic Scene Classification with Deep Convolutional Autoencoders},
   author={Wilkinghoff, Kevin and Kurth, Frank},
-  note={To appear in: Proceedings of the Detection and Classification of Acoustic Scenes and Events Workshop (DCASE)},
+  booktitle={Proceedings of the Detection and Classification of Acoustic Scenes and Events Workshop (DCASE)},
+  publisher={New York University},
+  pages={258--262},
   year={2019}
 }
-
-
